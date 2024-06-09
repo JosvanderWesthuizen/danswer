@@ -83,9 +83,9 @@ If using PowerShell, the command slightly differs:
 
 Install the required python dependencies:
 ```bash
-pip install -r danswer/backend/requirements/default.txt
-pip install -r danswer/backend/requirements/dev.txt
-pip install -r danswer/backend/requirements/model_server.txt
+pip install -r backend/requirements/default.txt
+pip install -r backend/requirements/dev.txt
+pip install -r backend/requirements/model_server.txt
 ```
 
 Install [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) for the frontend.
