@@ -133,6 +133,7 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     prompts: Mapped[list["Prompt"]] = relationship("Prompt", back_populates="user")
     # Personas owned by this user
     personas: Mapped[list["Persona"]] = relationship("Persona", back_populates="user")
+    llm_settings: Mapped["UserLLMSettings"] = relationship("UserLLMSettings", back_populates="user")
 
 
 class AccessToken(SQLAlchemyBaseAccessTokenTableUUID, Base):
@@ -822,6 +823,29 @@ class LLMProvider(Base):
 
     # should only be set for a single provider
     is_default_provider: Mapped[bool | None] = mapped_column(Boolean, unique=True)
+
+
+class UserLLMSettings(Base):
+    __tablename__ = 'user_llm_settings'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    provider: Mapped[str] = mapped_column(String)
+    api_key: Mapped[str | None] = mapped_column(EncryptedString(), nullable=True)
+    api_base: Mapped[str | None] = mapped_column(String, nullable=True)
+    api_version: Mapped[str | None] = mapped_column(String, nullable=True)
+    custom_config: Mapped[dict[str, str] | None] = mapped_column(postgresql.JSONB(), nullable=True)
+    default_model_name: Mapped[str] = mapped_column(String)
+    fast_default_model_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    model_names: Mapped[list[str] | None] = mapped_column(
+        postgresql.ARRAY(String), nullable=True
+    )
+    is_default_provider: Mapped[bool | None] = mapped_column(Boolean)
+    
+    # created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now())
+    # updated_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+    user_id: Mapped[UUID] = mapped_column(ForeignKey('user.id'), nullable=False, unique=True)
+    user: Mapped[User] = relationship('User', back_populates='llm_settings')
 
 
 class DocumentSet(Base):

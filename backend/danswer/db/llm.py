@@ -3,7 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from danswer.db.models import LLMProvider as LLMProviderModel
-from danswer.server.manage.llm.models import FullLLMProvider
+from danswer.db.models import UserLLMSettings
+from danswer.server.manage.llm.models import FullLLMProvider, FullUserLLMProvider
 from danswer.server.manage.llm.models import LLMProviderUpsertRequest
 
 
@@ -46,6 +47,25 @@ def upsert_llm_provider(
     return FullLLMProvider.from_model(llm_provider_model)
 
 
+def upsert_user_llm_settings(db_session: Session, user_id: int, settings: dict) -> FullUserLLMProvider:
+    llm_settings = db_session.query(UserLLMSettings).filter(
+        UserLLMSettings.user_id == user_id,
+        UserLLMSettings.name == settings['name']
+    ).first()
+    
+    if llm_settings:
+        for key, value in settings.items():
+            setattr(llm_settings, key, value)
+        db_session.commit()
+        return FullUserLLMProvider.from_model(llm_settings)
+        
+    llm_settings = UserLLMSettings(user_id=user_id, **settings)
+    db_session.add(llm_settings)
+    db_session.commit()
+    
+    return FullUserLLMProvider.from_model(llm_settings)
+
+
 def fetch_existing_llm_providers(db_session: Session) -> list[LLMProviderModel]:
     return list(db_session.scalars(select(LLMProviderModel)).all())
 
@@ -68,6 +88,32 @@ def fetch_provider(db_session: Session, provider_name: str) -> FullLLMProvider |
     if not provider_model:
         return None
     return FullLLMProvider.from_model(provider_model)
+
+def fetch_user_llm_settings(db_session: Session, user_id: int) -> list[UserLLMSettings]:
+    return db_session.query(UserLLMSettings).filter(UserLLMSettings.user_id == user_id).all()
+
+def fetch_user_default_provider(db_session: Session, user_id: int) -> FullUserLLMProvider | None:
+    provider_model = db_session.scalar(
+        select(UserLLMSettings).where(
+            UserLLMSettings.user_id == user_id,
+            UserLLMSettings.is_default_provider == True  # noqa: E712
+        )
+    )
+    if not provider_model:
+        return None
+    return FullUserLLMProvider.from_model(provider_model)
+
+
+def fetch_user_provider(db_session: Session, user_id: int, provider_name: str) -> FullUserLLMProvider | None:
+    provider_model = db_session.scalar(
+        select(UserLLMSettings).where(
+            UserLLMSettings.user_id == user_id,
+            UserLLMSettings.name == provider_name
+        )
+    )
+    if not provider_model:
+        return None
+    return FullUserLLMProvider.from_model(provider_model)
 
 
 def remove_llm_provider(db_session: Session, provider_id: int) -> None:

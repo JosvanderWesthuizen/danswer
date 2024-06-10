@@ -1,11 +1,13 @@
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
+from uuid import UUID
 
 from danswer.llm.llm_provider_options import fetch_models_for_provider
 
 if TYPE_CHECKING:
     from danswer.db.models import LLMProvider as LLMProviderModel
+    from danswer.db.models import User, UserLLMSettings
 
 
 class TestLLMRequest(BaseModel):
@@ -90,4 +92,31 @@ class FullLLMProvider(LLMProvider):
                 or fetch_models_for_provider(llm_provider_model.provider)
                 or [llm_provider_model.default_model_name]
             ),
+        )
+
+
+class FullUserLLMProvider(FullLLMProvider):
+    user_id: UUID
+    user: User
+
+    @classmethod
+    def from_model(cls, llm_provider_model: "UserLLMSettings") -> "FullUserLLMProvider":
+        return cls(
+            id=llm_provider_model.id,
+            name=llm_provider_model.name,
+            provider=llm_provider_model.provider,
+            api_key=llm_provider_model.api_key,
+            api_base=llm_provider_model.api_base,
+            api_version=llm_provider_model.api_version,
+            custom_config=llm_provider_model.custom_config,
+            default_model_name=llm_provider_model.default_model_name,
+            fast_default_model_name=llm_provider_model.fast_default_model_name,
+            is_default_provider=llm_provider_model.is_default_provider,
+            model_names=(
+                llm_provider_model.model_names
+                or fetch_models_for_provider(llm_provider_model.provider)
+                or [llm_provider_model.default_model_name]
+            ),
+            user_id=llm_provider_model.user_id,
+            user=llm_provider_model.user,
         )

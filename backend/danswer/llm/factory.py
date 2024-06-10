@@ -3,13 +3,18 @@ from danswer.configs.chat_configs import QA_TIMEOUT
 from danswer.configs.model_configs import GEN_AI_TEMPERATURE
 from danswer.configs.model_configs import LITELLM_EXTRA_HEADERS
 from danswer.db.engine import get_session_context_manager
-from danswer.db.llm import fetch_default_provider
-from danswer.db.llm import fetch_provider
+from danswer.db.llm import fetch_default_provider, fetch_user_default_provider
+from danswer.db.llm import fetch_provider, fetch_user_provider
 from danswer.db.models import Persona
 from danswer.llm.chat_llm import DefaultMultiLLM
 from danswer.llm.exceptions import GenAIDisabledException
 from danswer.llm.interfaces import LLM
 from danswer.llm.override_models import LLMOverride
+
+from danswer.auth.users import current_user
+from danswer.db.models import User
+from fastapi import Depends
+
 
 
 def get_llm_for_persona(
@@ -27,23 +32,24 @@ def get_llm_for_persona(
         temperature=temperature_override or GEN_AI_TEMPERATURE,
     )
 
-
 def get_default_llm(
     timeout: int = QA_TIMEOUT,
     temperature: float = GEN_AI_TEMPERATURE,
     use_fast_llm: bool = False,
     model_provider_name: str | None = None,
     model_version: str | None = None,
+    user: User = Depends(current_user)
 ) -> LLM:
     if DISABLE_GENERATIVE_AI:
         raise GenAIDisabledException()
 
+    user_id = user.id
     # TODO: pass this in
     with get_session_context_manager() as session:
         if model_provider_name is None:
-            llm_provider = fetch_default_provider(session)
+            llm_provider = fetch_user_default_provider(session, user_id)
         else:
-            llm_provider = fetch_provider(session, model_provider_name)
+            llm_provider = fetch_user_provider(session, user_id, model_provider_name)
 
     if not llm_provider:
         raise ValueError("No default LLM provider found")
