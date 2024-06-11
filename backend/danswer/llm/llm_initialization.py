@@ -9,7 +9,7 @@ from danswer.configs.model_configs import GEN_AI_MODEL_PROVIDER
 from danswer.configs.model_configs import GEN_AI_MODEL_VERSION
 from danswer.db.llm import fetch_existing_llm_providers
 from danswer.db.llm import update_default_provider
-from danswer.db.llm import upsert_llm_provider
+from danswer.db.llm import upsert_llm_provider, upsert_user_llm_settings
 from danswer.llm.llm_provider_options import AZURE_PROVIDER_NAME
 from danswer.llm.llm_provider_options import BEDROCK_PROVIDER_NAME
 from danswer.llm.llm_provider_options import fetch_available_well_known_llms
@@ -71,7 +71,8 @@ def load_llm_providers(db_session: Session) -> None:
         ),
         model_names=model_names,
     )
-    llm_provider = upsert_llm_provider(db_session, llm_provider_request)
+    # llm_provider = upsert_llm_provider(db_session, llm_provider_request)
+    llm_provider = upsert_user_llm_settings(db_session, llm_provider_request)
     update_default_provider(db_session, llm_provider.id)
     logger.info(
         f"Migrated LLM provider from env variables for provider '{GEN_AI_MODEL_PROVIDER}'"

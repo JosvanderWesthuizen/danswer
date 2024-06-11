@@ -11,7 +11,7 @@ from danswer.db.engine import get_session
 from danswer.db.llm import fetch_existing_llm_providers
 from danswer.db.llm import remove_llm_provider
 from danswer.db.llm import update_default_provider
-from danswer.db.llm import upsert_llm_provider
+from danswer.db.llm import upsert_llm_provider, upsert_user_llm_settings
 from danswer.db.models import User
 from danswer.llm.factory import get_default_llm
 from danswer.llm.factory import get_llm
@@ -122,7 +122,8 @@ def put_llm_provider(
     _: User | None = Depends(current_admin_user),
     db_session: Session = Depends(get_session),
 ) -> FullLLMProvider:
-    return upsert_llm_provider(db_session, llm_provider)
+    # return upsert_llm_provider(db_session, llm_provider)
+    return upsert_user_llm_settings(db_session, llm_provider)
 
 
 @admin_router.delete("/provider/{provider_id}")

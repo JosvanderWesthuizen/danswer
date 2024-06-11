@@ -7,6 +7,10 @@ from danswer.db.models import UserLLMSettings
 from danswer.server.manage.llm.models import FullLLMProvider, FullUserLLMProvider
 from danswer.server.manage.llm.models import LLMProviderUpsertRequest
 
+from danswer.auth.users import current_user
+from danswer.db.models import User
+from fastapi import Depends
+
 
 def upsert_llm_provider(
     db_session: Session, llm_provider: LLMProviderUpsertRequest
@@ -47,13 +51,17 @@ def upsert_llm_provider(
     return FullLLMProvider.from_model(llm_provider_model)
 
 
-def upsert_user_llm_settings(db_session: Session, user_id: int, settings: dict) -> FullUserLLMProvider:
+def upsert_user_llm_settings(db_session: Session, settings: LLMProviderUpsertRequest,
+                             user: User = Depends(current_user)
+                             ) -> FullUserLLMProvider:
+    user_id = user.id
     llm_settings = db_session.query(UserLLMSettings).filter(
         UserLLMSettings.user_id == user_id,
         UserLLMSettings.name == settings['name']
     ).first()
     
     if llm_settings:
+        assert llm_settings.user_id == user_id
         for key, value in settings.items():
             setattr(llm_settings, key, value)
         db_session.commit()

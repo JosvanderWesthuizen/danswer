@@ -12,7 +12,7 @@ from danswer.configs.model_configs import GEN_AI_MODEL_VERSION
 from danswer.db.engine import get_session_context_manager
 from danswer.db.llm import fetch_existing_llm_providers
 from danswer.db.llm import update_default_provider
-from danswer.db.llm import upsert_llm_provider
+from danswer.db.llm import upsert_llm_provider, upsert_user_llm_settings
 from danswer.dynamic_configs.factory import get_dynamic_config_store
 from danswer.dynamic_configs.factory import PostgresBackedDynamicConfigStore
 from danswer.dynamic_configs.interface import ConfigNotFoundError
@@ -104,7 +104,8 @@ def port_api_key_to_postgres() -> None:
             fast_default_model_name=default_fast_model_name,
             model_names=None,
         )
-        llm_provider = upsert_llm_provider(db_session, llm_provider_upsert)
+        # llm_provider = upsert_llm_provider(db_session, llm_provider_upsert)
+        llm_provider = upsert_user_llm_settings(db_session, llm_provider_upsert)
         update_default_provider(db_session, llm_provider.id)
         logger.info(f"Ported over LLM provider:\n\n{llm_provider}")
 
