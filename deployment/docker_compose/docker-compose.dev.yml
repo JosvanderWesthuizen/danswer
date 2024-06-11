@@ -18,7 +18,8 @@ services:
       - "8080:8080"
     environment:
       # Auth Settings
-      - AUTH_TYPE=${AUTH_TYPE:-disabled}
+      - AUTH_TYPE=${AUTH_TYPE:-disabled}  #If you want to change this without restarting the docker build, do it via env variables
+      # We typically set env variables in the launch.json
       - SESSION_EXPIRE_TIME_SECONDS=${SESSION_EXPIRE_TIME_SECONDS:-86400}
       - ENCRYPTION_KEY_SECRET=${ENCRYPTION_KEY_SECRET:-}
       - VALID_EMAIL_DOMAINS=${VALID_EMAIL_DOMAINS:-}

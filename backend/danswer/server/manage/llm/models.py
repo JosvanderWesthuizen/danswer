@@ -97,7 +97,7 @@ class FullLLMProvider(LLMProvider):
 
 class FullUserLLMProvider(FullLLMProvider):
     user_id: UUID
-    user: User
+    user: "User"
 
     @classmethod
     def from_model(cls, llm_provider_model: "UserLLMSettings") -> "FullUserLLMProvider":
