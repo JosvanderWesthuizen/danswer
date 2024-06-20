@@ -18,7 +18,9 @@ from fastapi import Depends
 
 
 def get_llm_for_persona(
-    persona: Persona, llm_override: LLMOverride | None = None
+    persona: Persona,
+    llm_override: LLMOverride | None = None,
+    additional_headers: dict[str, str] | None = None,
 ) -> LLM:
     model_provider_override = llm_override.model_provider if llm_override else None
     model_version_override = llm_override.model_version if llm_override else None
@@ -30,6 +32,7 @@ def get_llm_for_persona(
         ),
         model_version=(model_version_override or persona.llm_model_version_override),
         temperature=temperature_override or GEN_AI_TEMPERATURE,
+        additional_headers=additional_headers,
     )
 
 def get_default_llm(
@@ -38,7 +41,8 @@ def get_default_llm(
     use_fast_llm: bool = False,
     model_provider_name: str | None = None,
     model_version: str | None = None,
-    user: User = Depends(current_user)
+    user: User = Depends(current_user),
+    additional_headers: dict[str, str] | None = None,
 ) -> LLM:
     if DISABLE_GENERATIVE_AI:
         raise GenAIDisabledException()
@@ -71,6 +75,7 @@ def get_default_llm(
         custom_config=llm_provider.custom_config,
         timeout=timeout,
         temperature=temperature,
+        additional_headers=additional_headers,
     )
 
 
@@ -83,7 +88,14 @@ def get_llm(
     custom_config: dict[str, str] | None = None,
     temperature: float = GEN_AI_TEMPERATURE,
     timeout: int = QA_TIMEOUT,
+    additional_headers: dict[str, str] | None = None,
 ) -> LLM:
+    extra_headers = {}
+    if additional_headers:
+        extra_headers.update(additional_headers)
+    if LITELLM_EXTRA_HEADERS:
+        extra_headers.update(LITELLM_EXTRA_HEADERS)
+
     return DefaultMultiLLM(
         model_provider=provider,
         model_name=model,
@@ -93,5 +105,5 @@ def get_llm(
         timeout=timeout,
         temperature=temperature,
         custom_config=custom_config,
-        extra_headers=LITELLM_EXTRA_HEADERS,
+        extra_headers=extra_headers,
     )
