@@ -48,14 +48,16 @@
             "env": {
                 "LOG_ALL_MODEL_INTERACTIONS": "True",
                 "LOG_LEVEL": "DEBUG",
-                "PYTHONUNBUFFERED": "1"
+                "PYTHONUNBUFFERED": "1",
+                "AUTH_TYPE": "basic",
             },
             "args": [
                 "danswer.main:app",
                 "--reload",
                 "--port",
                 "8080"
-            ]
+            ],
+            "consoleTitle": "API Server"
         },
         {
             "name": "Indexing",
