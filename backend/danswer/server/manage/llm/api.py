@@ -121,9 +121,10 @@ def put_llm_provider(
     llm_provider: LLMProviderUpsertRequest,
     _: User | None = Depends(current_admin_user),
     db_session: Session = Depends(get_session),
+    user: User = Depends(current_user),
 ) -> FullLLMProvider:
     # return upsert_llm_provider(db_session, llm_provider)
-    return upsert_user_llm_settings(db_session, llm_provider)
+    return upsert_user_llm_settings(db_session, llm_provider, user)
 
 
 @admin_router.delete("/provider/{provider_id}")

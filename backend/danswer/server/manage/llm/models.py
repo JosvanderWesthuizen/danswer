@@ -120,3 +120,5 @@ class FullUserLLMProvider(FullLLMProvider):
             user_id=llm_provider_model.user_id,
             user=llm_provider_model.user,
         )
+    
+FullUserLLMProvider.update_forward_refs()

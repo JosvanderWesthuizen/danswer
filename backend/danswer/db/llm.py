@@ -57,7 +57,7 @@ def upsert_user_llm_settings(db_session: Session, settings: LLMProviderUpsertReq
     user_id = user.id
     llm_settings = db_session.query(UserLLMSettings).filter(
         UserLLMSettings.user_id == user_id,
-        UserLLMSettings.name == settings['name']
+        UserLLMSettings.name == settings.name
     ).first()
     
     if llm_settings:
@@ -67,7 +67,18 @@ def upsert_user_llm_settings(db_session: Session, settings: LLMProviderUpsertReq
         db_session.commit()
         return FullUserLLMProvider.from_model(llm_settings)
         
-    llm_settings = UserLLMSettings(user_id=user_id, **settings)
+    llm_settings = UserLLMSettings(user_id=user_id, 
+        name=settings.name,
+        provider=settings.provider,
+        api_key=settings.api_key,
+        api_base=settings.api_base,
+        api_version=settings.api_version,
+        custom_config=settings.custom_config,
+        default_model_name=settings.default_model_name,
+        fast_default_model_name=settings.fast_default_model_name,
+        model_names=settings.model_names,
+        is_default_provider=None,
+    )
     db_session.add(llm_settings)
     db_session.commit()
     
