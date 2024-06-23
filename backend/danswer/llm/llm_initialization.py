@@ -7,7 +7,7 @@ from danswer.configs.model_configs import GEN_AI_API_KEY
 from danswer.configs.model_configs import GEN_AI_API_VERSION
 from danswer.configs.model_configs import GEN_AI_MODEL_PROVIDER
 from danswer.configs.model_configs import GEN_AI_MODEL_VERSION
-from danswer.db.llm import fetch_existing_llm_providers
+from danswer.db.llm import fetch_existing_llm_providers, fetch_user_llm_settings
 from danswer.db.llm import update_default_provider
 from danswer.db.llm import upsert_llm_provider, upsert_user_llm_settings
 from danswer.llm.llm_provider_options import AZURE_PROVIDER_NAME
@@ -22,6 +22,7 @@ logger = setup_logger()
 
 def load_llm_providers(db_session: Session) -> None:
     existing_providers = fetch_existing_llm_providers(db_session)
+    # existing_providers = fetch_user_llm_settings(db_session)
     if existing_providers:
         return
 

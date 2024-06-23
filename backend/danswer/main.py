@@ -207,12 +207,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         create_initial_default_connector(db_session)
         associate_default_cc_pair(db_session)
 
-        logger.info("Loading LLM providers from env variables")
-        load_llm_providers(db_session)
+        # logger.info("Loading LLM providers from env variables")
+        # load_llm_providers(db_session)
 
-        logger.info("Loading default Prompts and Personas")
-        delete_old_default_personas(db_session)
-        load_chat_yamls()
+        # logger.info("Loading default Prompts and Personas")
+        # delete_old_default_personas(db_session)
+        # load_chat_yamls()
 
         logger.info("Loading built-in tools")
         load_builtin_tools(db_session)

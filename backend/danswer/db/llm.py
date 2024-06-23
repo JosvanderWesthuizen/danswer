@@ -84,6 +84,7 @@ def upsert_user_llm_settings(db_session: Session, settings: LLMProviderUpsertReq
             model_names=settings.model_names,
             is_default_provider=None,
         )
+        db_session.add(llm_provider_model)
         db_session.commit()
         return FullLLMProvider.from_model(llm_provider_model)
         

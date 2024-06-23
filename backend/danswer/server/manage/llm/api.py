@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from danswer.auth.users import current_admin_user
 from danswer.auth.users import current_user
 from danswer.db.engine import get_session
-from danswer.db.llm import fetch_existing_llm_providers
+from danswer.db.llm import fetch_existing_llm_providers, fetch_user_llm_settings
 from danswer.db.llm import remove_llm_provider
 from danswer.db.llm import update_default_provider
 from danswer.db.llm import upsert_llm_provider, upsert_user_llm_settings
@@ -109,10 +109,12 @@ def test_default_provider(
 def list_llm_providers(
     _: User | None = Depends(current_admin_user),
     db_session: Session = Depends(get_session),
+    user: User = Depends(current_user),
 ) -> list[FullLLMProvider]:
     return [
         FullLLMProvider.from_model(llm_provider_model)
-        for llm_provider_model in fetch_existing_llm_providers(db_session)
+        # for llm_provider_model in fetch_existing_llm_providers(db_session)
+        for llm_provider_model in fetch_user_llm_settings(db_session, user.id)
     ]
 
 
@@ -155,5 +157,6 @@ def list_llm_provider_basics(
 ) -> list[LLMProviderDescriptor]:
     return [
         LLMProviderDescriptor.from_model(llm_provider_model)
-        for llm_provider_model in fetch_existing_llm_providers(db_session)
+        # for llm_provider_model in fetch_existing_llm_providers(db_session)
+        for llm_provider_model in fetch_user_llm_settings(db_session)
     ]

@@ -10,7 +10,7 @@ from danswer.configs.model_configs import GEN_AI_API_VERSION
 from danswer.configs.model_configs import GEN_AI_MODEL_PROVIDER
 from danswer.configs.model_configs import GEN_AI_MODEL_VERSION
 from danswer.db.engine import get_session_context_manager
-from danswer.db.llm import fetch_existing_llm_providers
+from danswer.db.llm import fetch_existing_llm_providers, fetch_user_llm_settings
 from danswer.db.llm import update_default_provider
 from danswer.db.llm import upsert_llm_provider, upsert_user_llm_settings
 from danswer.dynamic_configs.factory import get_dynamic_config_store
@@ -64,7 +64,9 @@ def port_api_key_to_postgres() -> None:
 
     with get_session_context_manager() as db_session:
         # if we already have ported things over / setup providers in the db, don't do anything
-        if len(fetch_existing_llm_providers(db_session)) > 0:
+        # if len(fetch_existing_llm_providers(db_session)) > 0:
+        #     return
+        if len(fetch_user_llm_settings(db_session)) > 0:
             return
 
         api_key = GEN_AI_API_KEY
