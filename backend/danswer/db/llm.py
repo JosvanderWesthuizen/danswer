@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from danswer.db.models import LLMProvider as LLMProviderModel
 from danswer.db.models import UserLLMSettings
-from danswer.server.manage.llm.models import FullLLMProvider, FullUserLLMProvider
+from danswer.server.manage.llm.models import FullLLMProvider
 from danswer.server.manage.llm.models import LLMProviderUpsertRequest
 
 from danswer.auth.users import current_user
@@ -53,19 +53,39 @@ def upsert_llm_provider(
 
 def upsert_user_llm_settings(db_session: Session, settings: LLMProviderUpsertRequest,
                              user: User = Depends(current_user)
-                             ) -> FullUserLLMProvider:
+                             ) -> FullLLMProvider:
     user_id = user.id
     llm_settings = db_session.query(UserLLMSettings).filter(
         UserLLMSettings.user_id == user_id,
-        UserLLMSettings.name == settings.name
     ).first()
     
     if llm_settings:
         assert llm_settings.user_id == user_id
-        for key, value in settings.items():
-            setattr(llm_settings, key, value)
+        llm_settings.provider = settings.provider
+        llm_settings.api_key = settings.api_key
+        llm_settings.api_base = settings.api_base
+        llm_settings.api_version = settings.api_version
+        llm_settings.custom_config = settings.custom_config
+        llm_settings.default_model_name = settings.default_model_name
+        llm_settings.fast_default_model_name = (
+            settings.fast_default_model_name
+        )
+        llm_settings.model_names = settings.model_names
+        
+        llm_provider_model = LLMProviderModel(
+            name=settings.name, # TODO: somehow ensure that each model created here has a unique primary key
+            provider=settings.provider,
+            api_key=settings.api_key,
+            api_base=settings.api_base,
+            api_version=settings.api_version,
+            custom_config=settings.custom_config,
+            default_model_name=settings.default_model_name,
+            fast_default_model_name=settings.fast_default_model_name,
+            model_names=settings.model_names,
+            is_default_provider=None,
+        )
         db_session.commit()
-        return FullUserLLMProvider.from_model(llm_settings)
+        return FullLLMProvider.from_model(llm_provider_model)
         
     llm_settings = UserLLMSettings(user_id=user_id, 
         name=settings.name,
@@ -80,9 +100,22 @@ def upsert_user_llm_settings(db_session: Session, settings: LLMProviderUpsertReq
         is_default_provider=None,
     )
     db_session.add(llm_settings)
+    llm_provider_model = LLMProviderModel(
+        name=settings.name,
+        provider=settings.provider,
+        api_key=settings.api_key,
+        api_base=settings.api_base,
+        api_version=settings.api_version,
+        custom_config=settings.custom_config,
+        default_model_name=settings.default_model_name,
+        fast_default_model_name=settings.fast_default_model_name,
+        model_names=settings.model_names,
+        is_default_provider=None,
+    )
+    db_session.add(llm_provider_model)
     db_session.commit()
     
-    return FullUserLLMProvider.from_model(llm_settings)
+    return FullLLMProvider.from_model(llm_provider_model)
 
 
 def fetch_existing_llm_providers(db_session: Session) -> list[LLMProviderModel]:
@@ -111,7 +144,7 @@ def fetch_provider(db_session: Session, provider_name: str) -> FullLLMProvider |
 def fetch_user_llm_settings(db_session: Session, user_id: int) -> list[UserLLMSettings]:
     return db_session.query(UserLLMSettings).filter(UserLLMSettings.user_id == user_id).all()
 
-def fetch_user_default_provider(db_session: Session, user_id: int) -> FullUserLLMProvider | None:
+def fetch_user_default_provider(db_session: Session, user_id: int) -> FullLLMProvider | None:
     provider_model = db_session.scalar(
         select(UserLLMSettings).where(
             UserLLMSettings.user_id == user_id,
@@ -120,19 +153,42 @@ def fetch_user_default_provider(db_session: Session, user_id: int) -> FullUserLL
     )
     if not provider_model:
         return None
-    return FullUserLLMProvider.from_model(provider_model)
+    model_to_return = LLMProviderModel(
+        name=provider_model.name,
+        provider=provider_model.provider,
+        api_key=provider_model.api_key,
+        api_base=provider_model.api_base,
+        api_version=provider_model.api_version,
+        custom_config=provider_model.custom_config,
+        default_model_name=provider_model.default_model_name,
+        fast_default_model_name=provider_model.fast_default_model_name,
+        model_names=provider_model.model_names,
+        is_default_provider=None,
+    )
+    return FullLLMProvider.from_model(model_to_return)
 
 
-def fetch_user_provider(db_session: Session, user_id: int, provider_name: str) -> FullUserLLMProvider | None:
+def fetch_user_provider(db_session: Session, user_id: int, provider_name: str) -> FullLLMProvider | None:
     provider_model = db_session.scalar(
         select(UserLLMSettings).where(
             UserLLMSettings.user_id == user_id,
-            UserLLMSettings.name == provider_name
         )
     )
     if not provider_model:
         return None
-    return FullUserLLMProvider.from_model(provider_model)
+    model_to_return = LLMProviderModel(
+        name=provider_model.name,
+        provider=provider_model.provider,
+        api_key=provider_model.api_key,
+        api_base=provider_model.api_base,
+        api_version=provider_model.api_version,
+        custom_config=provider_model.custom_config,
+        default_model_name=provider_model.default_model_name,
+        fast_default_model_name=provider_model.fast_default_model_name,
+        model_names=provider_model.model_names,
+        is_default_provider=None,
+    )
+    return FullLLMProvider.from_model(model_to_return)
 
 
 def remove_llm_provider(db_session: Session, provider_id: int) -> None:
