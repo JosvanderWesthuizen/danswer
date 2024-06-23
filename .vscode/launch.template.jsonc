@@ -103,5 +103,11 @@
                 "PYTHONPATH": "."
             }
         }
+    ],
+    "compounds": [
+        {
+            "name": "General Test",
+            "configurations": ["Web Server", "Model Server", "API Server", "Indexing", "Background Jobs"]
+        }
     ]
 }
