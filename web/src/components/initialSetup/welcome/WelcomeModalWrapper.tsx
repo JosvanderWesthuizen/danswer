@@ -8,19 +8,21 @@ import { User, CCPairBasicInfo } from "@/lib/types";
 
 export function hasCompletedWelcomeFlowSS() {
   const cookieStore = cookies();
-  return (
-    cookieStore.get(COMPLETED_WELCOME_FLOW_COOKIE)?.value?.toLowerCase() ===
-    "true"
-  );
+  return (false);
+  // return (
+  //   cookieStore.get(COMPLETED_WELCOME_FLOW_COOKIE)?.value?.toLowerCase() ===
+  //   "true"
+  // );
 }
 
-export function shouldShowWelcomeModalFunc(user: User | null, ccPairs: CCPairBasicInfo[]): boolean {
+export function shouldShowWelcomeModalFun(user: User | null, ccPairs: CCPairBasicInfo[]): boolean {
   const hasAnyConnectors = ccPairs.length > 0;
-  return (
-    !hasCompletedWelcomeFlowSS() &&
-    !hasAnyConnectors &&
-    (!user || user.role === "admin")
-  );
+  return (!hasCompletedWelcomeFlowSS());
+  // return (
+  //   !hasCompletedWelcomeFlowSS() &&
+  //   !hasAnyConnectors &&
+  //   (!user || user.role === "admin")
+  // );
 }
 
 export function WelcomeModal({ user }: { user: User | null }) {
