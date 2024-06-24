@@ -15,7 +15,7 @@ export function hasCompletedWelcomeFlowSS() {
   // );
 }
 
-export function shouldShowWelcomeModalFun(user: User | null, ccPairs: CCPairBasicInfo[]): boolean {
+export function shouldShowWelcomeModalFunc(user: User | null, ccPairs: CCPairBasicInfo[]): boolean {
   const hasAnyConnectors = ccPairs.length > 0;
   return (!hasCompletedWelcomeFlowSS());
   // return (
