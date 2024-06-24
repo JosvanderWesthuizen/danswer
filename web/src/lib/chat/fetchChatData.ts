@@ -21,7 +21,7 @@ import { Folder } from "@/app/chat/folders/interfaces";
 import { personaComparator } from "@/app/admin/assistants/lib";
 import { cookies } from "next/headers";
 import { DOCUMENT_SIDEBAR_WIDTH_COOKIE_NAME } from "@/components/resizable/contants";
-import { hasCompletedWelcomeFlowSS } from "@/components/initialSetup/welcome/WelcomeModalWrapper";
+import { shouldShowWelcomeModalFunc } from "@/components/initialSetup/welcome/WelcomeModalWrapper";
 
 interface FetchChatDataResult {
   user: User | null;
@@ -154,10 +154,7 @@ export async function fetchChatData(searchParams: {
     : undefined;
 
   const hasAnyConnectors = ccPairs.length > 0;
-  const shouldShowWelcomeModal =
-    !hasCompletedWelcomeFlowSS() &&
-    !hasAnyConnectors &&
-    (!user || user.role === "admin");
+  const shouldShowWelcomeModal = shouldShowWelcomeModalFunc(user, ccPairs);
   const shouldDisplaySourcesIncompleteModal =
     hasAnyConnectors &&
     !shouldShowWelcomeModal &&

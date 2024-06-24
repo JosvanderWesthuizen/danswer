@@ -15,7 +15,7 @@ import { SearchType } from "@/lib/search/interfaces";
 import { Persona } from "../admin/assistants/interfaces";
 import {
   WelcomeModal,
-  hasCompletedWelcomeFlowSS,
+  shouldShowWelcomeModalFunc,
 } from "@/components/initialSetup/welcome/WelcomeModalWrapper";
 import { unstable_noStore as noStore } from "next/cache";
 import { InstantSSRAutoRefresh } from "@/components/SSRAutoRefresh";
@@ -128,10 +128,7 @@ export default async function Home() {
       : SearchType.SEMANTIC; // default to semantic
 
   const hasAnyConnectors = ccPairs.length > 0;
-  const shouldShowWelcomeModal =
-    !hasCompletedWelcomeFlowSS() &&
-    !hasAnyConnectors &&
-    (!user || user.role === "admin");
+  const shouldShowWelcomeModal = shouldShowWelcomeModalFunc(user, ccPairs);
 
   const shouldDisplayNoSourcesModal =
     (!user || user.role === "admin") &&
